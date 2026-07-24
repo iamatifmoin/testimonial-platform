@@ -3,10 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "node scripts/run-vite.cjs build",
-    "dev": "node scripts/run-vite.cjs build --watch"
-  },
-  "dependencies": {
-    "vite": "^5.3.1"
+    "build": "node scripts/build-widget.cjs",
+    "dev": "node --watch scripts/build-widget.cjs"
   }
 }
