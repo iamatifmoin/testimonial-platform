@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "vite build",
-    "dev": "vite build --watch"
+    "build": "node scripts/run-vite.cjs build",
+    "dev": "node scripts/run-vite.cjs build --watch"
   },
   "dependencies": {
     "vite": "^5.3.1"
