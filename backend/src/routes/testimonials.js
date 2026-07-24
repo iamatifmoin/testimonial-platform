@@ -3,6 +3,7 @@ const { v4: uuid } = require("uuid");
 
 const db = require("../db/db");
 const { upload } = require("../middleware/upload");
+const { analyzeSentiment } = require("../services/sentiment");
 
 const router = express.Router();
 
@@ -83,6 +84,13 @@ async function fetchById(id) {
   return Array.isArray(data) && data.length > 0 ? data[0] : null;
 }
 
+if (process.env.NODE_ENV !== "production") {
+  router.get("/sentiment-test", async (req, res) => {
+    const sentiment = await analyzeSentiment(req.query.text);
+    return res.json({ sentiment });
+  });
+}
+
 router.post("/", upload.single("photo"), async (req, res, next) => {
   try {
     const validation = validateSubmission(req.body);
@@ -120,6 +128,24 @@ router.post("/", upload.single("photo"), async (req, res, next) => {
         Prefer: "return=representation",
       },
     });
+
+    analyzeSentiment(text)
+      .then((sentiment) => {
+        if (!sentiment) {
+          return;
+        }
+
+        return db.request({
+          method: "PATCH",
+          query: {
+            id: `eq.${id}`,
+          },
+          body: {
+            sentiment,
+          },
+        });
+      })
+      .catch(() => {});
 
     return res.status(201).json({
       id,
