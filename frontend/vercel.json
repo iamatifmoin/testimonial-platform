@@ -2,6 +2,10 @@
     "$schema": "https://openapi.vercel.sh/vercel.json",
     "rewrites": [
         {
+            "source": "/widget.js",
+            "destination": "https://testimonial-platform-gz2q.onrender.com/widget.js"
+        },
+        {
             "source": "/api/:path*",
             "destination": "https://testimonial-platform-gz2q.onrender.com/api/:path*"
         },

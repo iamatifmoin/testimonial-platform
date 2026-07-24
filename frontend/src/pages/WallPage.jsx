@@ -198,7 +198,7 @@ export default function WallPage() {
   }
 
   function openDemoPage() {
-    window.open("https://testimonial-platform.vercel.app/demo.html", "_blank", "noopener,noreferrer");
+    window.open("/demo.html", "_blank", "noopener,noreferrer");
   }
 
   const averageRating = getAverageRating(allLoaded);

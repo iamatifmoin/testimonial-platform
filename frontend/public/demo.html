@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Demo page: Serve this from the app or backend so same-origin widget URLs work. -->
+<!-- Demo page: Served by the frontend so the widget can load through same-origin rewrites. -->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -399,10 +399,7 @@
     </footer>
     <script>
       (function mountWidget() {
-        var origin =
-          window.location.protocol === "file:"
-            ? "http://localhost:3001"
-            : window.location.origin;
+        var origin = window.location.origin;
         var script = document.createElement("script");
 
         script.src = origin + "/widget.js";
