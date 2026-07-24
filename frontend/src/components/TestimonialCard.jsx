@@ -61,7 +61,7 @@ export default function TestimonialCard({ testimonial, showStatus = false, compa
 
       <ExpandableText text={testimonial.text || ""} />
 
-      <p className="mt-4 text-xs text-gray-400">{formatDate(testimonial.created_at)}</p>
+      {!compact ? <p className="mt-4 text-xs text-gray-400">{formatDate(testimonial.created_at)}</p> : null}
     </article>
   );
 }

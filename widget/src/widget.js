@@ -325,7 +325,7 @@
 
   function brandingHtml() {
     return (
-      '<div class="branding">Powered by <a href="#" target="_blank" rel="noreferrer">TestimonialHub</a></div>'
+      '<div class="branding">Powered by <a href="#" target="_blank" rel="noreferrer">Testimonial-Platform</a></div>'
     );
   }
 

@@ -100,7 +100,7 @@ export default function WallPage() {
     let metaTag = document.querySelector(metaSelector);
     const createdMetaTag = !metaTag;
 
-    document.title = "Testimonials — TestimonialHub";
+    document.title = "Testimonials — Testimonial-Platform";
 
     if (!metaTag) {
       metaTag = document.createElement("meta");
@@ -110,7 +110,7 @@ export default function WallPage() {
 
     metaTag.setAttribute(
       "content",
-      "Browse real customer testimonials and see why people love TestimonialHub."
+      "Browse real customer testimonials and see why people love Testimonial-Platform."
     );
 
     return () => {
@@ -197,6 +197,10 @@ export default function WallPage() {
     setBannerVisible(false);
   }
 
+  function openDemoPage() {
+    window.open("http://localhost:3001/demo.html", "_blank", "noopener,noreferrer");
+  }
+
   const averageRating = getAverageRating(allLoaded);
   const monthCount = getMonthCount(allLoaded);
   const hasMore = page < totalPages;
@@ -207,18 +211,18 @@ export default function WallPage() {
     <div className="page-enter pb-8">
       {bannerVisible ? (
         <div className="mb-8 flex flex-col gap-4 rounded-xl border border-primary-100 bg-primary-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+          <button
+            type="button"
+            onClick={openDemoPage}
+            className="flex-1 text-left"
+          >
             <p className="text-sm font-medium text-primary-900">
               Add this wall to your website - embed it with our widget.
             </p>
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard")}
-              className="mt-1 rounded-md text-sm font-medium text-primary-700 transition-colors duration-150 hover:text-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
-            >
+            <span className="mt-1 inline-block rounded-md text-sm font-medium text-primary-700 transition-colors duration-150 hover:text-primary-800">
               Learn how {"\u2192"}
-            </button>
-          </div>
+            </span>
+          </button>
 
           <button
             type="button"
@@ -264,7 +268,7 @@ export default function WallPage() {
 
       {isCompletelyEmpty ? (
         <EmptyState
-          icon="\uD83D\uDCAC"
+          icon=""
           title="No testimonials yet"
           description="Be the first to share your experience!"
           action={

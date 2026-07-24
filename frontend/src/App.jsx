@@ -55,7 +55,7 @@ function Navbar() {
           to="/"
           className="rounded-md text-lg font-bold text-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
         >
-          TestimonialHub
+          Testimonial-Platform
         </NavLink>
         <nav className="hidden items-center gap-6 md:flex">
           <NavLink to="/wall" className={linkClassName}>

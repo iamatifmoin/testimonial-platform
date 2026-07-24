@@ -13,6 +13,8 @@ const app = express();
 const port = Number(process.env.PORT) || 3001;
 const uploadsDir = path.resolve("./uploads");
 const widgetPath = path.resolve(__dirname, "../../widget/dist/widget.js");
+const demoPagePath = path.resolve(__dirname, "../../demo.html");
+const openCors = cors();
 
 function setOpenCors(req, res, next) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -21,17 +23,15 @@ function setOpenCors(req, res, next) {
 
 fs.mkdirSync(uploadsDir, { recursive: true });
 
-app.use(
-  "/api",
-  cors({
-    origin: process.env.FRONTEND_URL || "*",
-    credentials: true,
-  })
-);
+app.use("/api", openCors);
 app.use("/uploads", setOpenCors, express.static(uploadsDir));
 app.use(express.json());
 
 app.use("/api/testimonials", testimonialRouter);
+
+app.get("/demo.html", (req, res) => {
+  res.sendFile(demoPagePath);
+});
 
 app.get("/widget.js", setOpenCors, (req, res) => {
   if (!fs.existsSync(widgetPath)) {
