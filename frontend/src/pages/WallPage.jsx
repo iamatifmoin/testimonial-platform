@@ -67,7 +67,7 @@ function RatingFilter({ selectedRating, onSelect }) {
             type="button"
             onClick={() => onSelect(value)}
             className={[
-              "inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150",
+              "inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
               isSelected
                 ? "bg-primary-600 text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -93,6 +93,34 @@ export default function WallPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [bannerVisible, setBannerVisible] = useState(() => sessionStorage.getItem(DISMISS_KEY) !== "true");
+
+  useEffect(() => {
+    const previousTitle = document.title;
+    const metaSelector = 'meta[property="og:description"]';
+    let metaTag = document.querySelector(metaSelector);
+    const createdMetaTag = !metaTag;
+
+    document.title = "Testimonials — TestimonialHub";
+
+    if (!metaTag) {
+      metaTag = document.createElement("meta");
+      metaTag.setAttribute("property", "og:description");
+      document.head.appendChild(metaTag);
+    }
+
+    metaTag.setAttribute(
+      "content",
+      "Browse real customer testimonials and see why people love TestimonialHub."
+    );
+
+    return () => {
+      document.title = previousTitle;
+
+      if (createdMetaTag) {
+        metaTag.remove();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     let isActive = true;
@@ -176,7 +204,7 @@ export default function WallPage() {
   const showFilteredEmpty = !loading && !error && total > 0 && displayed.length === 0;
 
   return (
-    <div className="pb-8">
+    <div className="page-enter pb-8">
       {bannerVisible ? (
         <div className="mb-8 flex flex-col gap-4 rounded-xl border border-primary-100 bg-primary-50 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -186,7 +214,7 @@ export default function WallPage() {
             <button
               type="button"
               onClick={() => navigate("/dashboard")}
-              className="mt-1 text-sm font-medium text-primary-700 transition-colors duration-150 hover:text-primary-800"
+              className="mt-1 rounded-md text-sm font-medium text-primary-700 transition-colors duration-150 hover:text-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
             >
               Learn how {"\u2192"}
             </button>
@@ -195,7 +223,7 @@ export default function WallPage() {
           <button
             type="button"
             onClick={dismissBanner}
-            className="self-start rounded-full p-2 text-primary-500 transition-colors duration-150 hover:bg-primary-100 hover:text-primary-700 sm:self-auto"
+            className="self-start rounded-full p-2 text-primary-500 transition-colors duration-150 hover:bg-primary-100 hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 sm:self-auto"
             aria-label="Dismiss embed banner"
           >
             {"\u00D7"}

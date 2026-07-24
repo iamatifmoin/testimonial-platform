@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { deleteTestimonial, getTestimonials, updateStatus } from "../api/client";
-import Avatar from "../components/Avatar";
 import Badge from "../components/Badge";
 import Button from "../components/Button";
 import EmptyState from "../components/EmptyState";
-import StarRating from "../components/StarRating";
+import TestimonialCard from "../components/TestimonialCard";
 import Toast from "../components/Toast";
 import useToast from "../hooks/useToast";
 
@@ -93,34 +92,28 @@ function LoadingRows() {
   );
 }
 
-function TestimonialRow({ testimonial, actionLoading, onStatusChange, onDelete }) {
+function TestimonialRow({
+  testimonial,
+  actionLoading,
+  isFocused,
+  onFocusRow,
+  onBlurRow,
+  onStatusChange,
+  onDelete
+}) {
   const isPending = testimonial.status === "pending";
   const isApproved = testimonial.status === "approved";
   const isRejected = testimonial.status === "rejected";
 
   return (
-    <article className="border-b border-gray-100 py-4 transition-colors duration-150 hover:bg-gray-50">
+    <article
+      className="group border-b border-gray-100 py-4 transition-colors duration-150 hover:bg-gray-50"
+      onMouseEnter={() => onFocusRow(testimonial.id)}
+      onMouseLeave={onBlurRow}
+    >
       <div className="flex items-start gap-4">
-        <Avatar name={testimonial.name} photoUrl={testimonial.photo_url} size="row" />
-
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <h3 className="text-sm font-semibold text-gray-900">{testimonial.name}</h3>
-            <p className="text-sm text-gray-500">{testimonial.company || "No company"}</p>
-            <StarRating value={testimonial.rating} size="sm" />
-          </div>
-
-          <p
-            className="mt-2 text-sm text-gray-600"
-            style={{
-              display: "-webkit-box",
-              WebkitBoxOrient: "vertical",
-              WebkitLineClamp: 2,
-              overflow: "hidden"
-            }}
-          >
-            {testimonial.text}
-          </p>
+          <TestimonialCard testimonial={testimonial} compact />
 
           {testimonial.sentiment ? (
             <div className="mt-2">
@@ -139,6 +132,15 @@ function TestimonialRow({ testimonial, actionLoading, onStatusChange, onDelete }
             <span>{formatDate(testimonial.created_at)}</span>
             <span className="ml-3">{testimonial.email}</span>
           </div>
+
+          <p
+            className={[
+              "mt-2 text-xs text-gray-400 transition-opacity duration-150",
+              isFocused ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            ].join(" ")}
+          >
+            Press A to approve, R to reject
+          </p>
         </div>
 
         <div className="shrink-0">
@@ -153,6 +155,7 @@ function TestimonialRow({ testimonial, actionLoading, onStatusChange, onDelete }
                 variant="primary"
                 disabled={actionLoading}
                 onClick={() => onStatusChange(testimonial, "approved")}
+                aria-label={`Approve testimonial by ${testimonial.name}`}
               >
                 Approve
               </Button>
@@ -161,6 +164,7 @@ function TestimonialRow({ testimonial, actionLoading, onStatusChange, onDelete }
                 variant="danger"
                 disabled={actionLoading}
                 onClick={() => onStatusChange(testimonial, "rejected")}
+                aria-label={`Reject testimonial by ${testimonial.name}`}
               >
                 Reject
               </Button>
@@ -173,6 +177,7 @@ function TestimonialRow({ testimonial, actionLoading, onStatusChange, onDelete }
               variant="secondary"
               disabled={actionLoading}
               onClick={() => onStatusChange(testimonial, "rejected")}
+              aria-label={`Reject testimonial by ${testimonial.name}`}
             >
               Reject
             </Button>
@@ -184,6 +189,7 @@ function TestimonialRow({ testimonial, actionLoading, onStatusChange, onDelete }
               variant="secondary"
               disabled={actionLoading}
               onClick={() => onStatusChange(testimonial, "approved")}
+              aria-label={`Approve testimonial by ${testimonial.name}`}
             >
               Approve
             </Button>
@@ -195,6 +201,7 @@ function TestimonialRow({ testimonial, actionLoading, onStatusChange, onDelete }
             disabled={actionLoading}
             onClick={() => onDelete(testimonial)}
             className="px-2.5"
+            aria-label={`Delete testimonial by ${testimonial.name}`}
           >
             {"\u00D7"}
           </Button>
@@ -216,11 +223,12 @@ export default function DashboardPage() {
   const [countsLoading, setCountsLoading] = useState(true);
   const [error, setError] = useState("");
   const [actionState, setActionState] = useState({});
+  const [focusedRowId, setFocusedRowId] = useState(null);
   const { toast, showToast } = useToast();
 
   const currentStatus = activeTab === "all" ? undefined : activeTab;
 
-  const loadCounts = useCallback(async () => {
+  const fetchCounts = useCallback(async () => {
     setCountsLoading(true);
 
     try {
@@ -264,8 +272,8 @@ export default function DashboardPage() {
   }, [currentStatus, page]);
 
   useEffect(() => {
-    loadCounts();
-  }, [loadCounts]);
+    fetchCounts();
+  }, [fetchCounts]);
 
   useEffect(() => {
     loadTestimonials();
@@ -287,24 +295,12 @@ export default function DashboardPage() {
     [counts]
   );
 
-  const updateCountsForStatusChange = useCallback((previousStatus, nextStatus) => {
-    setCounts((current) => ({
-      ...current,
-      pending: Math.max(0, current.pending - (previousStatus === "pending" ? 1 : 0) + (nextStatus === "pending" ? 1 : 0)),
-      approved: Math.max(
-        0,
-        current.approved - (previousStatus === "approved" ? 1 : 0) + (nextStatus === "approved" ? 1 : 0)
-      ),
-      rejected: Math.max(
-        0,
-        current.rejected - (previousStatus === "rejected" ? 1 : 0) + (nextStatus === "rejected" ? 1 : 0)
-      )
-    }));
-  }, []);
-
   const handleStatusChange = useCallback(
     async (testimonial, nextStatus) => {
-      const previousStatus = testimonial.status;
+      if (testimonial.status === nextStatus) {
+        return;
+      }
+
       const shouldRemoveFromList = activeTab !== "all" && activeTab !== nextStatus;
       const previousTestimonials = testimonials;
       const previousTotal = total;
@@ -313,7 +309,6 @@ export default function DashboardPage() {
       const nextTotalPages = nextTotal === 0 ? 0 : Math.ceil(nextTotal / PAGE_SIZE);
 
       setActionState((current) => ({ ...current, [testimonial.id]: true }));
-      updateCountsForStatusChange(previousStatus, nextStatus);
 
       if (shouldRemoveFromList) {
         setTestimonials((current) => current.filter((item) => item.id !== testimonial.id));
@@ -327,13 +322,13 @@ export default function DashboardPage() {
 
       try {
         await updateStatus(testimonial.id, nextStatus);
+        await fetchCounts();
         showToast(`Testimonial ${nextStatus === "approved" ? "approved" : "rejected"}`);
 
         if (shouldRemoveFromList && nextTotal === 0 && page > 1) {
           setPage((current) => Math.max(1, current - 1));
         }
       } catch (err) {
-        updateCountsForStatusChange(nextStatus, previousStatus);
         setTestimonials(previousTestimonials);
         setTotal(previousTotal);
         setTotalPages(previousTotalPages);
@@ -342,7 +337,7 @@ export default function DashboardPage() {
         setActionState((current) => ({ ...current, [testimonial.id]: false }));
       }
     },
-    [activeTab, page, showToast, testimonials, total, totalPages, updateCountsForStatusChange]
+    [activeTab, fetchCounts, page, showToast, testimonials, total, totalPages]
   );
 
   const handleDelete = useCallback(
@@ -364,15 +359,10 @@ export default function DashboardPage() {
       setTestimonials((current) => current.filter((item) => item.id !== testimonial.id));
       setTotal(nextTotal);
       setTotalPages(nextTotalPages);
-      setCounts((current) => ({
-        all: Math.max(0, current.all - 1),
-        pending: Math.max(0, current.pending - (testimonial.status === "pending" ? 1 : 0)),
-        approved: Math.max(0, current.approved - (testimonial.status === "approved" ? 1 : 0)),
-        rejected: Math.max(0, current.rejected - (testimonial.status === "rejected" ? 1 : 0))
-      }));
 
       try {
         await deleteTestimonial(testimonial.id);
+        await fetchCounts();
         showToast("Testimonial deleted");
 
         if (nextTotal === 0 && page > 1) {
@@ -383,15 +373,47 @@ export default function DashboardPage() {
         setTotal(previousTotal);
         setTotalPages(previousTotalPages);
         setCounts(previousCounts);
-        await loadCounts();
+        await fetchCounts();
         await loadTestimonials();
         showToast(err.message || "Failed to delete testimonial", "error");
       } finally {
         setActionState((current) => ({ ...current, [testimonial.id]: false }));
       }
     },
-    [counts, loadCounts, loadTestimonials, page, showToast, testimonials, total, totalPages]
+    [counts, fetchCounts, loadTestimonials, page, showToast, testimonials, total, totalPages]
   );
+
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (!focusedRowId) {
+        return;
+      }
+
+      const testimonial = testimonials.find((item) => item.id === focusedRowId);
+
+      if (!testimonial || actionState[testimonial.id]) {
+        return;
+      }
+
+      const key = event.key.toLowerCase();
+
+      if (key === "a" && testimonial.status !== "approved") {
+        event.preventDefault();
+        handleStatusChange(testimonial, "approved");
+      }
+
+      if (key === "r" && testimonial.status !== "rejected") {
+        event.preventDefault();
+        handleStatusChange(testimonial, "rejected");
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [actionState, focusedRowId, handleStatusChange, testimonials]);
 
   const handleTabChange = useCallback(
     (status) => {
@@ -411,7 +433,7 @@ export default function DashboardPage() {
   const hasPagination = totalPages > 1;
 
   return (
-    <div className="w-full">
+    <div className="page-enter w-full">
       <div className="flex flex-col gap-4 border-b border-gray-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
@@ -432,7 +454,7 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => handleTabChange(tab.key)}
                 className={[
-                  "inline-flex items-center gap-2 border-b-2 pb-3 text-sm font-medium transition-colors duration-150",
+                  "inline-flex items-center gap-2 border-b-2 pb-3 text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
                   isActive
                     ? "border-primary-600 text-primary-600"
                     : "border-transparent text-gray-500 hover:text-gray-700"
@@ -476,6 +498,9 @@ export default function DashboardPage() {
                   key={testimonial.id}
                   testimonial={testimonial}
                   actionLoading={Boolean(actionState[testimonial.id])}
+                  isFocused={focusedRowId === testimonial.id}
+                  onFocusRow={setFocusedRowId}
+                  onBlurRow={() => setFocusedRowId(null)}
                   onStatusChange={handleStatusChange}
                   onDelete={handleDelete}
                 />

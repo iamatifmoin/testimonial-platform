@@ -8,7 +8,7 @@ export default function Toast({ message, type = "success", visible }) {
         isSuccess ? "bg-green-600" : "bg-red-600",
         visible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"
       ].join(" ")}
-      role="status"
+      role="alert"
       aria-live="polite"
     >
       <span className="text-lg">{isSuccess ? "✓" : "×"}</span>

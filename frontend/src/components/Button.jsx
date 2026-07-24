@@ -20,7 +20,8 @@ export default function Button({
   disabled = false,
   onClick,
   type = "button",
-  className = ""
+  className = "",
+  ...props
 }) {
   const isDisabled = disabled || loading;
 
@@ -29,9 +30,10 @@ export default function Button({
       type={type}
       onClick={onClick}
       disabled={isDisabled}
+      {...props}
       className={[
         "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors duration-150",
-        "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
         "disabled:cursor-not-allowed disabled:opacity-60",
         variantClasses[variant] || variantClasses.primary,
         sizeClasses[size] || sizeClasses.md,
