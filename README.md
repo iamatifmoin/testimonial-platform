@@ -8,8 +8,7 @@ via a wall page and an embeddable widget.
 ### Setup
 
 ```bash
-git clone <repo-url>
-cd testimonial-platform
+git clone https://github.com/iamatifmoin/testimonial-platform.git
 npm install
 ```
 
@@ -80,8 +79,13 @@ Both produce `widget/dist/widget.js`, which the backend serves from
 
 ### Test the embed
 
-Open `demo.html` directly in a browser after starting the backend. The page
-loads the widget from `http://localhost:3001/widget.js`.
+For local testing, open the repo-root `demo.html` directly in a browser after
+starting the backend. When opened as a local file, it falls back to
+`http://localhost:3001`.
+
+For deployed usage, open `/demo.html` on the frontend domain. The production
+frontend serves `frontend/public/demo.html`, which loads `/widget.js` and uses
+same-origin rewrites to reach the backend.
 
 ## Core user flow
 
@@ -89,7 +93,7 @@ loads the widget from `http://localhost:3001/widget.js`.
 2. Visit `http://localhost:5173/dashboard` and review the pending entry.
 3. Approve or reject it from the dashboard.
 4. Visit `http://localhost:5173/wall` to see approved testimonials publicly.
-5. Open `demo.html` to validate the embeddable widget.
+5. Open `http://localhost:5173/demo.html` to validate the embeddable widget.
 
 ## API reference
 
@@ -117,6 +121,20 @@ loads the widget from `http://localhost:3001/widget.js`.
 
 ```html
 <script
+  src="https://your-frontend-domain/widget.js"
+  data-api-url="https://your-frontend-domain"
+  data-accent="#6366f1"
+  data-layout="grid"
+  data-limit="6"
+  data-title="What our customers say"
+  data-theme="light">
+</script>
+```
+
+For local development, use:
+
+```html
+<script
   src="http://localhost:3001/widget.js"
   data-api-url="http://localhost:3001"
   data-accent="#6366f1"
@@ -135,11 +153,16 @@ Supported widget options:
 - `data-title` - widget heading
 - `data-theme` - `light` or `dark`
 
-## Image storage note
+## Tech stack
 
-Uploaded photos are stored locally in `backend/uploads/` and served from
-`/uploads/:filename`. That is fine for local development, but production should
-move this to object storage such as S3 or Cloudinary.
+| Layer | Choice | Why |
+|---|---|---|
+| Frontend | React 18 + Vite + Tailwind CSS | Fast iteration and simple client routing |
+| Backend | Node.js + Express | Small API surface and predictable local setup |
+| Data | Supabase REST API | Managed persistence without building a custom DB layer |
+| Widget | Vanilla JS IIFE + Shadow DOM | Easy embed with style isolation |
+| File uploads | Multer + local disk storage | Simple local development path |
+| AI | Google Gemini 1.5 Flash | Lightweight sentiment labeling |
 
 ## What's built
 
@@ -161,170 +184,3 @@ move this to object storage such as S3 or Cloudinary.
 - AI sentiment analysis with Gemini 1.5 Flash
 - Sentiment badges visible in the moderation dashboard
 - Widget layout modes: `grid`, `list`, and `carousel`
-
-### What's not built (deliberate cuts)
-- Authentication for the dashboard
-- Multi-business support
-- Email notifications
-- Hosted image storage
-
-## Tech stack
-
-| Layer | Choice | Why |
-|---|---|---|
-| Frontend | React 18 + Vite + Tailwind CSS | Fast iteration and simple client routing |
-| Backend | Node.js + Express | Small API surface and predictable local setup |
-| Data | Supabase REST API | Managed persistence without building a custom DB layer |
-| Widget | Vanilla JS IIFE + Shadow DOM | Easy embed with style isolation |
-| File uploads | Multer + local disk storage | Simple local development path |
-| AI | Google Gemini 1.5 Flash | Lightweight sentiment labeling |
-
-## Repo structure
-
-- `backend/` - Express API on port `3001`
-- `frontend/` - Vite app on port `5173`
-- `widget/` - embeddable widget bundle
-- `demo.html` - standalone local page for testing the widget
-
-## Running locally
-
-### Prerequisites
-- Node.js 18+
-- npm 8+
-- A Supabase project with a `public.testimonials` table
-
-### Setup
-
-```bash
-git clone <repo-url>
-cd testimonial-platform
-npm install
-```
-
-### Environment
-
-Copy `backend/.env.example` to `backend/.env` and fill in the required values:
-
-```bash
-PORT=3001
-FRONTEND_URL=http://localhost:5173
-GEMINI_API_KEY=
-SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
-```
-
-Notes:
-- `SUPABASE_URL` is required.
-- Either `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_ANON_KEY` must be present.
-- `GEMINI_API_KEY` is optional. Without it, submissions still work and
-  sentiment stays `null`.
-
-### Required Supabase table
-
-Create `public.testimonials` in Supabase with:
-
-```sql
-create table if not exists public.testimonials (
-  id text primary key,
-  name text not null,
-  email text not null,
-  company text not null default '',
-  text text not null,
-  rating integer not null check (rating between 1 and 5),
-  photo_url text default null,
-  status text not null default 'pending'
-    check (status in ('pending', 'approved', 'rejected')),
-  sentiment text default null,
-  created_at timestamptz not null default timezone('utc', now())
-);
-```
-
-### Start the app
-
-```bash
-npm run dev
-```
-
-Available surfaces:
-- Frontend: [http://localhost:5173](http://localhost:5173)
-- Backend: [http://localhost:3001](http://localhost:3001)
-- Dashboard: [http://localhost:5173/dashboard](http://localhost:5173/dashboard)
-- Wall: [http://localhost:5173/wall](http://localhost:5173/wall)
-
-### Build the widget
-
-```bash
-npm run build:widget
-```
-
-You can also run:
-
-```bash
-npm run build -w widget
-```
-
-Both produce `widget/dist/widget.js`, which the backend serves from
-`GET /widget.js`.
-
-### Test the embed
-
-Open `demo.html` directly in a browser after starting the backend. The page
-loads the widget from `http://localhost:3001/widget.js`.
-
-## Core user flow
-
-1. Visit `http://localhost:5173` and submit a testimonial.
-2. Visit `http://localhost:5173/dashboard` and review the pending entry.
-3. Approve or reject it from the dashboard.
-4. Visit `http://localhost:5173/wall` to see approved testimonials publicly.
-5. Open `demo.html` to validate the embeddable widget.
-
-## API reference
-
-| Method | Path | Description |
-|---|---|---|
-| `POST` | `/api/testimonials` | Submit a testimonial as `multipart/form-data` |
-| `GET` | `/api/testimonials` | List testimonials with optional `status`, `page`, and `limit` |
-| `GET` | `/api/testimonials/public` | List approved testimonials for the wall and widget |
-| `PATCH` | `/api/testimonials/:id/status` | Change status to `approved` or `rejected` |
-| `DELETE` | `/api/testimonials/:id` | Delete a testimonial |
-| `GET` | `/widget.js` | Serve the built widget bundle |
-| `GET` | `/uploads/:filename` | Serve locally uploaded testimonial photos |
-
-### Submission fields
-
-`POST /api/testimonials` accepts:
-- `name` - required, 1 to 100 chars
-- `email` - required, valid email
-- `company` - optional
-- `text` - required, 10 to 2000 chars
-- `rating` - required integer from 1 to 5
-- `photo` - optional `jpeg`, `png`, `webp`, or `gif`, max 5 MB
-
-## Widget embed
-
-```html
-<script
-  src="http://localhost:3001/widget.js"
-  data-api-url="http://localhost:3001"
-  data-accent="#6366f1"
-  data-layout="grid"
-  data-limit="6"
-  data-title="What our customers say"
-  data-theme="light">
-</script>
-```
-
-Supported widget options:
-- `data-api-url` - required backend origin
-- `data-accent` - accent color
-- `data-layout` - `grid`, `list`, or `carousel`
-- `data-limit` - number of testimonials to fetch
-- `data-title` - widget heading
-- `data-theme` - `light` or `dark`
-
-## Image storage note
-
-Uploaded photos are stored locally in `backend/uploads/` and served from
-`/uploads/:filename`. That is fine for local development, but production should
-move this to object storage such as S3 or Cloudinary.
