@@ -1,10 +1,7 @@
 import { BrowserRouter, NavLink, Navigate, Route, Routes } from "react-router-dom";
 import DashboardPage from "./pages/DashboardPage";
 import SubmitPage from "./pages/SubmitPage";
-
-function WallPage() {
-  return <div>WallPage</div>;
-}
+import WallPage from "./pages/WallPage";
 
 function Navbar() {
   const linkClassName = ({ isActive }) =>
