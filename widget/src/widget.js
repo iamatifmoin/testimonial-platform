@@ -1,0 +1,1 @@
+// Widget entry point placeholder.
