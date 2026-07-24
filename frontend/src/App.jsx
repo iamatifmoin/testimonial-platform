@@ -1,9 +1,6 @@
 import { BrowserRouter, NavLink, Navigate, Route, Routes } from "react-router-dom";
+import DashboardPage from "./pages/DashboardPage";
 import SubmitPage from "./pages/SubmitPage";
-
-function DashboardPage() {
-  return <div>DashboardPage</div>;
-}
 
 function WallPage() {
   return <div>WallPage</div>;
