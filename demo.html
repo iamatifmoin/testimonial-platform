@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<!-- Demo page: Open this file in a browser AFTER starting the backend. -->
+<!-- Widget fetches from http://localhost:3001 - backend must be running. -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CloudSync - File storage for teams</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f4f7fb;
+        --surface: #ffffff;
+        --text: #102033;
+        --muted: #5b6b80;
+        --border: #d7e0ea;
+        --accent: #0f766e;
+        --accent-strong: #115e59;
+        --accent-soft: #dff6f2;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Helvetica, Arial, system-ui, sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 28%),
+          linear-gradient(180deg, #fbfdff 0%, var(--bg) 100%);
+        color: var(--text);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .container {
+        width: min(1120px, calc(100% - 2rem));
+        margin: 0 auto;
+      }
+
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        backdrop-filter: blur(14px);
+        background: rgba(251, 253, 255, 0.9);
+        border-bottom: 1px solid rgba(215, 224, 234, 0.75);
+      }
+
+      .nav-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 0;
+      }
+
+      .logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+
+      .logo-mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 0.8rem;
+        background: linear-gradient(135deg, var(--accent), #22c55e);
+        color: #fff;
+        box-shadow: 0 18px 30px rgba(15, 118, 110, 0.2);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 1.5rem;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .hero {
+        padding: 5rem 0 4rem;
+      }
+
+      .hero-card {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 2rem;
+        align-items: center;
+        padding: 3rem;
+        background: rgba(255, 255, 255, 0.82);
+        border: 1px solid rgba(215, 224, 234, 0.9);
+        border-radius: 28px;
+        box-shadow: 0 30px 80px rgba(16, 32, 51, 0.08);
+      }
+
+      .eyebrow {
+        display: inline-block;
+        margin-bottom: 1rem;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent-strong);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2.5rem, 6vw, 4.5rem);
+        line-height: 0.98;
+        letter-spacing: -0.05em;
+      }
+
+      .hero p {
+        margin: 1.25rem 0 0;
+        max-width: 40rem;
+        color: var(--muted);
+        font-size: 1.05rem;
+        line-height: 1.75;
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 10rem;
+        padding: 0.9rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        font-weight: 700;
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 0 18px 35px rgba(15, 118, 110, 0.22);
+      }
+
+      .btn-secondary {
+        border-color: var(--border);
+        background: #fff;
+        color: var(--text);
+      }
+
+      .hero-panel {
+        padding: 1.5rem;
+        border-radius: 24px;
+        background: linear-gradient(180deg, #18314f 0%, #102033 100%);
+        color: #eff6ff;
+      }
+
+      .hero-panel .stat {
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(239, 246, 255, 0.12);
+      }
+
+      .hero-panel .stat:last-child {
+        border-bottom: 0;
+      }
+
+      .hero-panel strong {
+        display: block;
+        font-size: 2rem;
+        letter-spacing: -0.04em;
+      }
+
+      .hero-panel span {
+        color: rgba(239, 246, 255, 0.72);
+        font-size: 0.95rem;
+      }
+
+      .section {
+        padding: 1.5rem 0 4rem;
+      }
+
+      .section-header {
+        margin-bottom: 1.5rem;
+      }
+
+      .section-header h2 {
+        margin: 0;
+        font-size: clamp(1.9rem, 4vw, 2.8rem);
+        letter-spacing: -0.04em;
+      }
+
+      .section-header p {
+        margin: 0.75rem 0 0;
+        max-width: 42rem;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+      }
+
+      .feature-card {
+        padding: 1.5rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        box-shadow: 0 18px 40px rgba(16, 32, 51, 0.05);
+      }
+
+      .feature-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 0.9rem;
+        background: var(--accent-soft);
+        color: var(--accent-strong);
+        font-weight: 700;
+      }
+
+      .feature-card h3 {
+        margin: 1rem 0 0.5rem;
+        font-size: 1.1rem;
+      }
+
+      .feature-card p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .testimonials-shell {
+        padding: 2rem;
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(247, 250, 252, 0.96));
+        border: 1px solid rgba(215, 224, 234, 0.9);
+        box-shadow: 0 24px 60px rgba(16, 32, 51, 0.07);
+      }
+
+      footer {
+        padding: 2rem 0 3rem;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .footer-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(215, 224, 234, 0.9);
+      }
+
+      @media (max-width: 900px) {
+        .hero-card,
+        .features {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .nav-links,
+        .hero-actions,
+        .footer-row {
+          flex-direction: column;
+        }
+
+        .hero {
+          padding-top: 3rem;
+        }
+
+        .hero-card,
+        .testimonials-shell {
+          padding: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="nav">
+      <div class="container nav-inner">
+        <a class="logo" href="#">
+          <span class="logo-mark">C</span>
+          <span>CloudSync</span>
+        </a>
+        <div class="nav-links">
+          <a href="#">Product</a>
+          <a href="#">Security</a>
+          <a href="#">Pricing</a>
+          <a href="#">Enterprise</a>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-card">
+          <div>
+            <span class="eyebrow">Built for fast-moving teams</span>
+            <h1>File storage that keeps every team in sync.</h1>
+            <p>
+              CloudSync gives product, design, and operations teams one place to store,
+              review, and ship files without version confusion or security overhead.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#">Start free trial</a>
+              <a class="btn btn-secondary" href="#">Book a live demo</a>
+            </div>
+          </div>
+          <aside class="hero-panel">
+            <div class="stat">
+              <strong>12 min</strong>
+              <span>Average time saved on every weekly file review cycle.</span>
+            </div>
+            <div class="stat">
+              <strong>99.98%</strong>
+              <span>Upload reliability across global distributed workspaces.</span>
+            </div>
+            <div class="stat">
+              <strong>4.9/5</strong>
+              <span>Customer satisfaction from teams managing client-facing deliverables.</span>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <h2>Everything your team needs to ship files confidently</h2>
+            <p>
+              Replace scattered drives, approval bottlenecks, and version drift with one
+              shared workspace built for internal collaboration and external delivery.
+            </p>
+          </div>
+          <div class="features">
+            <article class="feature-card">
+              <div class="feature-icon">01</div>
+              <h3>Shared approvals</h3>
+              <p>
+                Review assets, leave feedback, and lock final versions with a clear trail for
+                every stakeholder.
+              </p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon">02</div>
+              <h3>Access control</h3>
+              <p>
+                Keep contractors, clients, and internal teams aligned with role-based file
+                permissions and secure links.
+              </p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon">03</div>
+              <h3>Instant handoff</h3>
+              <p>
+                Deliver polished files to customers without switching tools or rebuilding
+                transfer workflows every time.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <h2>Trusted by thousands of teams</h2>
+            <p>
+              The block below is loaded from an external JavaScript widget served by the
+              testimonial backend, with isolated styles via Shadow DOM.
+            </p>
+          </div>
+          <div class="testimonials-shell">
+            <script
+              src="http://localhost:3001/widget.js"
+              data-api-url="http://localhost:3001"
+              data-accent="#6366f1"
+              data-layout="grid"
+              data-limit="6"
+              data-title="What our customers say"
+            ></script>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container footer-row">
+        <span>CloudSync - File storage for teams</span>
+        <span>Designed for a standalone widget integration demo.</span>
+      </div>
+    </footer>
+  </body>
+</html>
