@@ -30,6 +30,15 @@ Notes:
 - `GEMINI_API_KEY` is optional. Without it, submissions still work and
   sentiment stays `null`.
 
+For deployed frontend builds, set:
+
+```bash
+VITE_API_BASE_URL=https://your-backend-domain
+```
+
+Without that variable, the frontend falls back to same-origin `/api`, which only
+works if your host is also rewriting `/api` and `/uploads` to the backend.
+
 ### Required Supabase table
 
 Create `public.testimonials` in Supabase with:
@@ -86,6 +95,10 @@ starting the backend. When opened as a local file, it falls back to
 For deployed usage, open `/demo.html` on the frontend domain. The production
 frontend serves `frontend/public/demo.html`, which loads `/widget.js` and uses
 same-origin rewrites to reach the backend.
+
+If you deploy the frontend and backend on different domains, also set
+`VITE_API_BASE_URL` on the frontend deployment so submission, moderation, wall
+data, and uploaded photos all resolve against the deployed backend.
 
 ## Core user flow
 

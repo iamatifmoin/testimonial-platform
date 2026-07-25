@@ -1,3 +1,5 @@
+import { resolveBackendUrl } from "../api/baseUrl";
+
 const sizeClasses = {
   sm: "h-8 w-8 text-xs",
   row: "h-10 w-10 text-xs",
@@ -21,11 +23,12 @@ function getInitials(name = "") {
 
 export default function Avatar({ name, photoUrl, size = "md" }) {
   const classes = sizeClasses[size] || sizeClasses.md;
+  const resolvedPhotoUrl = resolveBackendUrl(photoUrl);
 
-  if (photoUrl) {
+  if (resolvedPhotoUrl) {
     return (
       <div className={`${classes} overflow-hidden rounded-full bg-gray-100`}>
-        <img src={photoUrl} alt={name} className="h-full w-full rounded-full object-cover" />
+        <img src={resolvedPhotoUrl} alt={name} className="h-full w-full rounded-full object-cover" />
       </div>
     );
   }
